@@ -84,6 +84,10 @@ button:disabled{cursor:not-allowed;opacity:.5}
 .setbtn{display:flex;align-items:center;gap:10px;border:1.5px solid var(--rule);background:var(--surface);border-radius:6px;padding:12px 20px;cursor:pointer;font-weight:700;font-size:19px;line-height:1.2;min-width:0}
 .setbtn:hover{background:var(--surface-2)}
 .setbtn svg{width:26px;height:26px;flex:none}
+.mast-l{display:flex;align-items:center;gap:18px;flex-wrap:wrap;min-width:0}
+.homebtn{background:var(--signal);color:var(--signal-ink);border-color:var(--signal-ink)}
+.homebtn:hover{background:var(--signal);filter:brightness(1.06)}
+.backbtn{width:100%;background:transparent;box-shadow:none}
 .setsum{font:600 16px/1.2 var(--font-mono);color:var(--ink-2);padding-left:14px;border-left:1px solid var(--line);max-width:60ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media (max-width:1180px){.setsum{display:none}}
 
@@ -367,9 +371,15 @@ img{max-width:100%}
 
 <div class="wrap">
   <header class="mast">
-    <div class="brand">
-      <span class="mark" aria-hidden="true"><i></i></span>
-      <span class="brand-name xp">Compresor de fotos</span>
+    <div class="mast-l">
+      <div class="brand">
+        <span class="mark" aria-hidden="true"><i></i></span>
+        <span class="brand-name xp">Compresor de fotos</span>
+      </div>
+      <button type="button" class="setbtn homebtn" id="homeBtn" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8M5 9.5V20h5v-6h4v6h5V9.5"/></svg>
+        <span id="homeLbl">Portada</span>
+      </button>
     </div>
     <button type="button" class="setbtn" id="openSettings" aria-haspopup="dialog">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg>
@@ -397,6 +407,10 @@ img{max-width:100%}
         <button type="button" class="pbtn yellow setcover" id="coverSet">
           <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 14h22M36 14h6M6 34h6M20 34h22"/><circle cx="32" cy="14" r="4.5"/><circle cx="16" cy="34" r="4.5"/></svg>
           <span><b>Ajustes</b><small id="coverSum"></small></span>
+        </button>
+        <button type="button" class="pbtn dark backbtn" id="backBtn" hidden>
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M30 10L16 24l14 14"/></svg>
+          <span><b>Volver a mis fotos</b><small id="backSub"></small></span>
         </button>
         <p class="cover-meta">
           <span>o arrastra aquí las fotos o la carpeta</span>
@@ -672,7 +686,7 @@ async function buildZip(files) {
 // ZIP-END
 
 /* ---------- Estado ---------- */
-const state = { items: [], settings: null };
+const state = { items: [], settings: null, home: false };
 let nextId = 1;
 let epoch = 0;
 let active = 0;
@@ -786,6 +800,8 @@ function closeDrawer() {
   if (DR.last && DR.last.focus) DR.last.focus();
 }
 $('#openSettings').addEventListener('click', openDrawer);
+$('#homeBtn').addEventListener('click', () => { state.home = !state.home; syncRows(); window.scrollTo(0, 0); });
+$('#backBtn').addEventListener('click', () => { state.home = false; syncRows(); window.scrollTo(0, 0); });
 $('#coverSet').addEventListener('click', openDrawer);
 $('#drClose').addEventListener('click', closeDrawer);
 $('#drDone').addEventListener('click', closeDrawer);
@@ -816,6 +832,7 @@ function isImage(file) {
 function addFiles(list) {
   let skipped = 0, added = 0;
   if (!state.settings) state.settings = readSettings();
+  state.home = false;
   for (const e of list) {
     if (!isImage(e.file)) { skipped++; continue; }
     state.items.push({
@@ -1063,13 +1080,19 @@ function syncRows() {
     if (!rows.has(it.id)) { const r = createRow(it); list.appendChild(r.el); }
     updateRow(it);
   }
-  const has = state.items.length > 0;
+  const any = state.items.length > 0;
+  if (!any) state.home = false;
+  const has = any && !state.home;
   list.hidden = !has;
   $('#summary').hidden = !has;
   $('#cover').hidden = has;
   $('#facts').hidden = has;
   $('#toolbar').hidden = !has;
   $('#trust').hidden = !has;
+  $('#homeBtn').hidden = !any;
+  $('#homeLbl').textContent = state.home ? 'Mis fotos (' + state.items.length + ')' : 'Portada';
+  $('#backBtn').hidden = !(any && state.home);
+  $('#backSub').textContent = state.items.length + (state.items.length === 1 ? ' foto cargada' : ' fotos cargadas');
 }
 
 function updateRow(it) {
