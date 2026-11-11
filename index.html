@@ -8,11 +8,12 @@
 <title>Compresor de Fotos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* Concepto: mesa de luz de fotografía. Papel gris neutro con cuadrícula, marcas de encuadre en las esquinas, números de fotograma,
    una losa amarilla tipo caja de carrete para el resultado y una hoja de contactos con barras de peso. En oscuro, cuarto oscuro.
-   Disposición: ancho completo; arriba dos botones enormes; tres bloques de ajustes con cabecera negra; losa amarilla; hoja de contactos. */
+   Disposición: portada ligera (titular, dos botones grandes, foto apilada) → al cargar fotos pasa a barra de añadir + losa + hoja de contactos.
+   Los ajustes viven en un panel lateral que se abre desde la cabecera. */
 :root{
   --bg:#e9eaec;
   --surface:#fafafa;
@@ -32,6 +33,7 @@
   --warn:#8a4b00;
   --warn-soft:#ffe6c2;
   --bad:#b3261e;
+  --bad-ink:#ffffff;
   --bad-soft:#fde3e0;
   --pic:#dde1e6;
   --overlay:rgba(250,250,250,.74);
@@ -44,17 +46,17 @@
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#17181b;--surface:#202125;--surface-2:#27282d;--ink:#f1f1ee;--ink-2:#a0a3ab;--line:#36383e;--rule:#5b5e67;
+    --bg:#17181b;--surface:#202125;--surface-2:#27282d;--ink:#f1f1ee;--ink-2:#a8abb3;--line:#36383e;--rule:#5b5e67;
     --grid:rgba(255,255,255,.05);--signal-soft:#3b3314;--band:#0b0b0d;--band-ink:#f1f1ee;
-    --good:#6fd596;--good-soft:#173322;--warn:#f0b866;--warn-soft:#3c2c10;--bad:#ff8b7e;--bad-soft:#3f1b17;
+    --good:#6fd596;--good-soft:#173322;--warn:#f0b866;--warn-soft:#3c2c10;--bad:#ff8b7e;--bad-ink:#2b0a06;--bad-soft:#3f1b17;
     --pic:#34363c;--overlay:rgba(23,24,27,.72);
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#17181b;--surface:#202125;--surface-2:#27282d;--ink:#f1f1ee;--ink-2:#a0a3ab;--line:#36383e;--rule:#5b5e67;
+  --bg:#17181b;--surface:#202125;--surface-2:#27282d;--ink:#f1f1ee;--ink-2:#a8abb3;--line:#36383e;--rule:#5b5e67;
   --grid:rgba(255,255,255,.05);--signal-soft:#3b3314;--band:#0b0b0d;--band-ink:#f1f1ee;
-  --good:#6fd596;--good-soft:#173322;--warn:#f0b866;--warn-soft:#3c2c10;--bad:#ff8b7e;--bad-soft:#3f1b17;
+  --good:#6fd596;--good-soft:#173322;--warn:#f0b866;--warn-soft:#3c2c10;--bad:#ff8b7e;--bad-ink:#2b0a06;--bad-soft:#3f1b17;
   --pic:#34363c;--overlay:rgba(23,24,27,.72);
   color-scheme:dark;
 }
@@ -73,35 +75,34 @@ button:disabled{cursor:not-allowed;opacity:.5}
 .xp{font-weight:800;font-stretch:125%}
 
 /* Cabecera */
-.mast{display:flex;align-items:center;justify-content:space-between;gap:10px 24px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--rule)}
+.mast{display:flex;align-items:center;justify-content:space-between;gap:10px 12px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--rule)}
 .brand{display:flex;align-items:center;gap:12px;min-width:0}
 .mark{width:30px;height:30px;border-radius:5px;background:var(--signal);border:2px solid var(--rule);display:grid;place-items:center;flex:none}
 .mark i{display:block;width:12px;height:12px;border-radius:50%;background:var(--signal-ink)}
 .brand-name{font-size:16px;letter-spacing:.02em;text-transform:uppercase;line-height:1.1}
-.live{font:500 12px/1.3 var(--font-mono);color:var(--ink-2)}
-.live::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--good);margin-right:8px;vertical-align:1px}
+.setbtn{display:flex;align-items:center;gap:10px;border:1.5px solid var(--rule);background:var(--surface);border-radius:6px;padding:9px 14px;cursor:pointer;font-weight:700;font-size:15px;line-height:1.2;min-width:0}
+.setbtn:hover{background:var(--surface-2)}
+.setbtn svg{width:20px;height:20px;flex:none}
+.setsum{font:500 12px/1.2 var(--font-mono);color:var(--ink-2);padding-left:10px;border-left:1px solid var(--line);max-width:52ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:980px){.setsum{display:none}}
 
-/* Zona de carga: dos botones enormes */
-.drop{
+/* Portada */
+.cover{
   position:relative;overflow:hidden;border:1px solid var(--rule);border-radius:8px;background-color:var(--surface);
   background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
   background-size:28px 28px;
-  padding:clamp(24px,3.4vw,48px);
-  display:flex;flex-direction:column;gap:clamp(20px,2.6vw,34px);
-  transition:background-color .15s;
+  padding:clamp(40px,7vw,104px) clamp(26px,5.5vw,88px);
 }
-.crop{position:absolute;width:20px;height:20px;border:0 solid var(--rule);pointer-events:none}
-.crop.tl{left:14px;top:14px;border-left-width:2px;border-top-width:2px}
-.crop.tr{right:14px;top:14px;border-right-width:2px;border-top-width:2px}
-.crop.bl{left:14px;bottom:14px;border-left-width:2px;border-bottom-width:2px}
-.crop.br{right:14px;bottom:14px;border-right-width:2px;border-bottom-width:2px}
-.drop.over{background-color:var(--signal-soft)}
-.drop.over .crop{border-color:var(--ink)}
-.drop-head{display:flex;align-items:center;justify-content:space-between;gap:24px;position:relative}
-.drop-copy{flex:1 1 320px;min-width:0}
-.drop-title{font-size:clamp(34px,5.2vw,76px);line-height:.98;letter-spacing:-.03em;margin:0 0 14px;text-wrap:balance}
-.drop-sub{margin:0;color:var(--ink-2);max-width:50ch;font-size:16px}
-.art{flex:none;width:min(260px,24vw);height:auto}
+.crop{position:absolute;width:22px;height:22px;border:0 solid var(--rule);pointer-events:none}
+.crop.tl{left:16px;top:16px;border-left-width:2px;border-top-width:2px}
+.crop.tr{right:16px;top:16px;border-right-width:2px;border-top-width:2px}
+.crop.bl{left:16px;bottom:16px;border-left-width:2px;border-bottom-width:2px}
+.crop.br{right:16px;bottom:16px;border-right-width:2px;border-bottom-width:2px}
+.cover-grid{display:flex;align-items:center;justify-content:space-between;gap:clamp(24px,5vw,80px);position:relative}
+.cover-copy{flex:1 1 520px;min-width:0;display:flex;flex-direction:column;gap:clamp(18px,2.4vw,30px)}
+.cover-title{font-size:clamp(40px,5.6vw,112px);line-height:.95;letter-spacing:-.035em;margin:0;text-wrap:balance}
+.cover-sub{margin:0;color:var(--ink-2);max-width:46ch;font-size:clamp(16px,1.4vw,20px)}
+.art{flex:none;width:min(430px,34vw);height:auto}
 .art .f1{fill:var(--surface-2);stroke:var(--rule);stroke-width:2}
 .art .f2{fill:var(--surface);stroke:var(--rule);stroke-width:2}
 .art .pic{fill:var(--pic)}
@@ -109,70 +110,99 @@ button:disabled{cursor:not-allowed;opacity:.5}
 .art .mtn{fill:var(--rule)}
 .art .tag{fill:var(--signal);stroke:var(--signal-ink);stroke-width:2}
 .art .tagtxt{font:600 16px var(--font-mono);fill:var(--signal-ink)}
-@media (max-width:760px){.art{display:none}}
-
-.pick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(12px,1.6vw,20px);position:relative}
+@media (max-width:820px){.art{display:none}}
+.pick{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:clamp(12px,1.6vw,20px)}
 .pbtn{
-  display:flex;align-items:center;gap:clamp(14px,1.6vw,22px);min-height:clamp(92px,9vw,128px);padding:18px clamp(20px,2.4vw,36px);
+  display:flex;align-items:center;gap:clamp(14px,1.6vw,22px);min-height:clamp(92px,8vw,124px);padding:18px clamp(20px,2.2vw,34px);
   border:2px solid var(--rule);border-radius:10px;cursor:pointer;text-align:left;
   box-shadow:0 5px 0 rgba(18,18,20,.22);transition:transform .12s,box-shadow .12s;
 }
 .pbtn:hover{transform:translateY(-2px);box-shadow:0 7px 0 rgba(18,18,20,.22)}
 .pbtn:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(18,18,20,.22)}
-.pbtn svg{flex:none;width:clamp(38px,3.6vw,56px);height:clamp(38px,3.6vw,56px)}
-.pbtn b{display:block;font-size:clamp(21px,2.4vw,34px);font-weight:800;font-stretch:112%;line-height:1.1;letter-spacing:-.015em}
+.pbtn svg{flex:none;width:clamp(38px,3.4vw,54px);height:clamp(38px,3.4vw,54px)}
+.pbtn b{display:block;font-size:clamp(21px,2.2vw,32px);font-weight:800;font-stretch:112%;line-height:1.1;letter-spacing:-.015em}
 .pbtn small{display:block;font:500 13px/1.3 var(--font-mono);margin-top:5px;opacity:.82}
 .pbtn.yellow{background:var(--signal);color:var(--signal-ink);border-color:var(--signal-ink)}
 .pbtn.dark{background:var(--band);color:var(--band-ink)}
-.pick-hint{margin:0;text-align:center;font:500 12.5px/1.4 var(--font-mono);color:var(--ink-2);position:relative}
-@media (max-width:640px){.pick{grid-template-columns:minmax(0,1fr)}}
-.drop.compact{padding:16px clamp(14px,2vw,24px);gap:10px;background-image:none}
-.drop.compact .drop-head,.drop.compact .crop{display:none}
-.drop.compact .pbtn{min-height:78px;padding:12px clamp(18px,2vw,28px)}
-.drop.compact .pbtn svg{width:36px;height:36px}
-.drop.compact .pbtn b{font-size:clamp(19px,1.9vw,26px)}
+.cover-meta{margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;font:500 12.5px/1.4 var(--font-mono);color:var(--ink-2)}
+.linkbtn{border:0;background:transparent;padding:0;cursor:pointer;font:600 12.5px/1.4 var(--font-mono);color:var(--ink);text-align:left}
+.linkbtn u{text-underline-offset:3px}
+.linkbtn:hover{color:var(--ink-2)}
+.facts{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 28px}
+.facts li{display:flex;align-items:flex-start;gap:10px;font:500 12.5px/1.45 var(--font-mono);color:var(--ink-2)}
+.facts li::before{content:"";flex:none;width:9px;height:9px;margin-top:4px;border-radius:2px;background:var(--signal);border:1.5px solid var(--rule)}
+.facts b{color:var(--ink);font-weight:600}
+@media (max-width:760px){.facts{grid-template-columns:minmax(0,1fr)}}
+
+/* Barra de añadir */
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 14px}
+.addbtn{display:flex;align-items:center;gap:12px;min-height:56px;padding:10px 24px 10px 18px;border:2px solid var(--rule);border-radius:8px;cursor:pointer;font-weight:800;font-size:17px;font-stretch:108%;line-height:1.1;box-shadow:0 3px 0 rgba(18,18,20,.2);transition:transform .12s,box-shadow .12s}
+.addbtn:hover{transform:translateY(-1px);box-shadow:0 4px 0 rgba(18,18,20,.2)}
+.addbtn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(18,18,20,.2)}
+.addbtn svg{width:24px;height:24px;flex:none}
+.addbtn.yellow{background:var(--signal);color:var(--signal-ink);border-color:var(--signal-ink)}
+.addbtn.dark{background:var(--band);color:var(--band-ink)}
+.toolbar .hint-r{margin-left:auto;font:500 12.5px/1.4 var(--font-mono);color:var(--ink-2)}
 
 .btn{border:1px solid var(--rule);background:transparent;border-radius:4px;padding:10px 16px;font-weight:600;font-size:14px;cursor:pointer;line-height:1.2;white-space:nowrap}
 .btn:hover:not(:disabled){background:var(--surface-2)}
 .btn.small{padding:6px 10px;font-size:12.5px}
+.btn.primary{background:var(--signal);color:var(--signal-ink);border-color:var(--signal-ink);font-weight:800;font-size:16px;padding:12px 28px}
+.btn.primary:hover:not(:disabled){background:var(--signal);filter:brightness(1.06)}
+.btn.danger{background:var(--bad);color:var(--bad-ink);border-color:var(--bad);font-weight:800;font-size:15px;padding:12px 22px}
+.btn.danger:hover:not(:disabled){background:var(--bad);filter:brightness(1.08)}
 .status{margin:0;font:500 12.5px/1.4 var(--font-mono);color:var(--ink-2);min-height:1.4em}
 .status.bad{color:var(--bad)}
 .status:empty{display:none}
 
-/* Ajustes: tres bloques */
-.settings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:stretch}
-@media (max-width:960px){.settings{grid-template-columns:minmax(0,1fr)}}
-.set{background:var(--surface);border:1px solid var(--rule);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
-.set-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:14px 18px;background:var(--band);color:var(--band-ink)}
+/* Panel de ajustes */
+.scrim{position:fixed;inset:0;z-index:44;background:rgba(10,10,12,.5)}
+.drawer{
+  position:fixed;top:0;right:0;bottom:0;z-index:45;width:min(600px,100%);background:var(--bg);border-left:1px solid var(--rule);
+  display:flex;flex-direction:column;box-shadow:-14px 0 40px rgba(0,0,0,.28);
+  padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) 0;
+}
+.drawer:not([hidden]){animation:slidein .22s ease-out}
+@keyframes slidein{from{transform:translateX(36px);opacity:0}to{transform:none;opacity:1}}
+.dr-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--rule);background:var(--surface)}
+.dr-head h2{margin:0;font-size:26px;line-height:1.1;letter-spacing:-.01em}
+.xbtn{width:42px;height:42px;border:1.5px solid var(--rule);border-radius:6px;background:transparent;font-size:26px;line-height:1;cursor:pointer;flex:none}
+.xbtn:hover{background:var(--surface-2)}
+.dr-body{flex:1;min-height:0;overflow:auto;padding:18px 20px;display:flex;flex-direction:column;gap:16px}
+.dr-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 20px;border-top:1px solid var(--rule);background:var(--surface)}
+.dr-sum{font:500 12.5px/1.45 var(--font-mono);color:var(--ink-2);min-width:0}
+.set{background:var(--surface);border:1px solid var(--rule);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;min-width:0;flex:none}
+.set-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:13px 18px;background:var(--band);color:var(--band-ink)}
 .set-head h3{margin:0;font-size:18px;line-height:1.1;letter-spacing:.06em;text-transform:uppercase;font-weight:800;font-stretch:118%}
 .set-val{font:600 13px/1.2 var(--font-mono);color:#ffc400;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.set-body{padding:18px;display:flex;flex-direction:column;gap:12px;flex:1}
-.set-sub{margin:6px 0 -2px;font:600 11px/1 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.set-body{padding:18px;display:flex;flex-direction:column;gap:12px}
+.set-sub{display:flex;align-items:center;gap:12px;margin:10px 0 0;font:700 13px/1.2 var(--font-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--ink)}
+.set-sub::after{content:"";flex:1;height:1px;background:var(--rule);opacity:.35}
 .set-sub:first-child{margin-top:0}
-.hint{margin:0;font-size:13px;color:var(--ink-2);line-height:1.45}
+.hint{margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+.note{margin:0;padding:11px 13px;border-radius:6px;background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn);font-size:13.5px;line-height:1.5;font-weight:500}
 .opts{display:grid;gap:8px}
 .opts.c1{grid-template-columns:minmax(0,1fr)}
 .opts.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .opts.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
-@media (max-width:960px) and (min-width:560px){.opts.c4w{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .opt{position:relative;display:block;min-width:0}
 .opt input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer;width:100%;height:100%}
 .face{position:relative;display:flex;flex-direction:column;justify-content:center;gap:2px;height:100%;min-height:66px;padding:10px 12px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface-2);min-width:0}
 .face b{font-weight:700;font-size:17px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.face small{font:400 11.5px/1.3 var(--font-mono);color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.face small{font:500 12px/1.3 var(--font-mono);color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .face.row{padding-right:42px;min-height:62px}
+.face.row b{white-space:normal}
 .face.row small{white-space:normal}
 .opt:hover input:not(:checked):not(:disabled) + .face{border-color:var(--rule)}
 .opt input:checked + .face{background:var(--signal);border-color:var(--signal-ink);color:var(--signal-ink)}
-.opt input:checked + .face small{color:var(--signal-ink);opacity:.82}
+.opt input:checked + .face small{color:var(--signal-ink);opacity:.85}
 .opt input:checked + .face::after{content:"✓";position:absolute;top:7px;right:10px;font:700 15px/1 var(--font-mono)}
 .opt input:checked + .face.row::after{top:50%;transform:translateY(-50%);right:14px}
 .opt input:focus-visible + .face{outline:2px solid var(--ink);outline-offset:2px}
 .opt input:disabled{cursor:not-allowed}
 .opt input:disabled + .face{opacity:.45}
-.setfoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 28px;padding:2px 2px 0}
-.check{display:flex;gap:9px;align-items:center;font-size:14px;cursor:pointer}
-.check input{accent-color:var(--ink);width:17px;height:17px;margin:0}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.4;cursor:pointer;font-weight:500}
+.check input{accent-color:var(--ink);width:18px;height:18px;margin:1px 0 0;flex:none}
 
 /* Resumen */
 .slab{background:var(--signal);color:var(--signal-ink);border:1px solid var(--signal-ink);border-radius:8px;padding:clamp(18px,2.4vw,30px);display:flex;flex-direction:column;gap:18px}
@@ -196,7 +226,7 @@ button:disabled{cursor:not-allowed;opacity:.5}
 .dlbig:disabled{opacity:.6;box-shadow:none}
 .dlbig svg{flex:none;width:36px;height:36px}
 .dlbig b{display:block;font-size:clamp(20px,2vw,26px);font-weight:800;font-stretch:112%;line-height:1.1}
-.dlbig small{display:block;font:500 12px/1.3 var(--font-mono);margin-top:5px;opacity:.88;overflow-wrap:anywhere}
+.dlbig small{display:block;font:500 12px/1.3 var(--font-mono);margin-top:5px;opacity:.9;overflow-wrap:anywhere}
 .meter{height:12px;border-radius:2px;background:rgba(18,18,20,.2);overflow:hidden}
 .meter i{display:block;height:100%;width:0;background:var(--signal-ink);transition:width .3s}
 .meter-labels{display:flex;justify-content:space-between;font:500 11px/1 var(--font-mono);letter-spacing:.06em;text-transform:uppercase;margin-top:7px}
@@ -224,6 +254,7 @@ button:disabled{cursor:not-allowed;opacity:.5}
 .shot .n{left:9px;background:#121214;color:#fff;font:600 12.5px/1 var(--font-mono);padding:6px 8px}
 .shot .fmt{right:9px;background:#ffc400;color:#121214;font:700 15px/1 var(--font-mono);padding:6px 10px}
 .shot .cmp{position:absolute;left:8px;bottom:8px;font:600 11px/1 var(--font-mono);letter-spacing:.06em;text-transform:uppercase;padding:5px 8px;border-radius:3px;background:rgba(18,18,20,.82);color:#fff;opacity:0;transition:opacity .15s}
+.shot .rep{position:absolute;left:9px;bottom:9px;font:600 12px/1 var(--font-mono);padding:6px 9px;border-radius:4px;background:#176b36;color:#fff}
 .card:hover .shot:not(:disabled) .cmp,.shot:focus-visible .cmp{opacity:1}
 @media (hover:none){.shot:not(:disabled) .cmp{opacity:.9}}
 .spin{position:absolute;inset:0;display:none;place-items:center;background:var(--overlay)}
@@ -250,7 +281,7 @@ button:disabled{cursor:not-allowed;opacity:.5}
 .card.err .save{display:none}
 .rm{width:30px;height:30px;border-radius:4px;border:1px solid transparent;background:transparent;cursor:pointer;font-size:20px;line-height:1;color:var(--ink-2)}
 .rm:hover{border-color:var(--line);color:var(--ink)}
-@media (prefers-reduced-motion:reduce){.spin::after{animation:none}.meter i,.bar i,.wbar i,.drop,.shot .cmp,.pbtn,.dlbig{transition:none}}
+@media (prefers-reduced-motion:reduce){.spin::after{animation:none}.drawer:not([hidden]){animation:none}.meter i,.bar i,.wbar i,.shot .cmp,.pbtn,.dlbig,.addbtn{transition:none}}
 .foot{font:400 12.5px/1.5 var(--font-mono);color:var(--ink-2);margin:0}
 @media (max-width:520px){
   .sheet{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -259,7 +290,23 @@ button:disabled{cursor:not-allowed;opacity:.5}
   .pill{margin-left:0}
   .cacts .btn.small{padding:6px 8px}
   .shot .fmt{font-size:14px;padding:5px 8px}
+  .addbtn{flex:1 1 100%}
+  .toolbar .hint-r{margin-left:0}
+  .dr-foot{flex-direction:column;align-items:stretch}
+  .dr-foot .btn{width:100%}
 }
+
+/* Arrastrar y soltar */
+.veil{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(255,196,0,.94);color:#121214;pointer-events:none}
+.veil i{position:absolute;inset:16px;border:3px dashed #121214;border-radius:14px}
+.veil p{margin:0;font-size:clamp(34px,7vw,84px);line-height:1;letter-spacing:-.03em;text-align:center;padding:0 24px}
+
+/* Confirmación */
+.modal{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:16px;background:rgba(10,10,12,.62)}
+.dialog{width:min(540px,100%);background:var(--surface);color:var(--ink);border:2px solid var(--rule);border-radius:10px;padding:clamp(20px,3vw,28px);display:flex;flex-direction:column;gap:14px;box-shadow:0 10px 0 rgba(0,0,0,.25)}
+.dialog h2{margin:0;font-size:clamp(22px,3vw,28px);line-height:1.15;letter-spacing:-.01em}
+.dialog p{margin:0;color:var(--ink-2);font-size:15.5px}
+.dialog .acts{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:4px}
 
 /* Comparador */
 .viewer{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;background:var(--stage);color:var(--stage-ink);
@@ -302,15 +349,33 @@ img{max-width:100%}
       <span class="mark" aria-hidden="true"><i></i></span>
       <span class="brand-name xp">Compresor de fotos</span>
     </div>
-    <span class="live">Se procesa en tu navegador · nada se sube</span>
+    <button type="button" class="setbtn" id="openSettings" aria-haspopup="dialog">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg>
+      <span>Ajustes</span>
+      <span class="setsum" id="setSum"></span>
+    </button>
   </header>
 
-  <section class="drop" id="drop" aria-label="Elegir fotos o carpeta">
+  <section class="cover" id="cover" aria-label="Portada">
     <i class="crop tl"></i><i class="crop tr"></i><i class="crop bl"></i><i class="crop br"></i>
-    <div class="drop-head">
-      <div class="drop-copy">
-        <h2 class="drop-title xp">Mismas fotos,<br>menos peso.</h2>
-        <p class="drop-sub">Elige varias fotos o una carpeta entera. Las carpetas conservan su estructura dentro del ZIP.</p>
+    <div class="cover-grid">
+      <div class="cover-copy">
+        <h1 class="cover-title xp">Mismas fotos,<br>menos peso.</h1>
+        <p class="cover-sub">Elige varias fotos o una carpeta entera y descárgalas más ligeras. Se procesan en tu navegador: no se sube nada a ningún sitio.</p>
+        <div class="pick">
+          <button type="button" class="pbtn yellow" data-pick="files">
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="9" width="38" height="30" rx="4"/><circle cx="17" cy="20" r="3.5"/><path d="M5 35l11-10 8 7 7-6 12 10"/></svg>
+            <span><b>Elegir fotos</b><small>Una o varias imágenes</small></span>
+          </button>
+          <button type="button" class="pbtn dark" data-pick="folder">
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 14a3 3 0 013-3h11l5 5h16a3 3 0 013 3v18a3 3 0 01-3 3H8a3 3 0 01-3-3z"/></svg>
+            <span><b>Elegir carpeta</b><small>Con todas sus subcarpetas</small></span>
+          </button>
+        </div>
+        <p class="cover-meta">
+          <span>o arrastra aquí las fotos o la carpeta</span>
+          <button type="button" class="linkbtn" id="coverSet"><span id="coverSum"></span> · <u>Cambiar ajustes</u></button>
+        </p>
       </div>
       <svg class="art" viewBox="0 0 280 210" aria-hidden="true" focusable="false">
         <g transform="rotate(-9 120 95)"><rect class="f1" x="34" y="26" width="160" height="120" rx="5"/></g>
@@ -325,79 +390,30 @@ img{max-width:100%}
         </g>
       </svg>
     </div>
-    <div class="pick">
-      <button type="button" class="pbtn yellow" id="pickFiles">
-        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="9" width="38" height="30" rx="4"/><circle cx="17" cy="20" r="3.5"/><path d="M5 35l11-10 8 7 7-6 12 10"/></svg>
-        <span><b>Elegir fotos</b><small>Una o varias imágenes a la vez</small></span>
-      </button>
-      <button type="button" class="pbtn dark" id="pickFolder">
-        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 14a3 3 0 013-3h11l5 5h16a3 3 0 013 3v18a3 3 0 01-3 3H8a3 3 0 01-3-3z"/></svg>
-        <span><b>Elegir carpeta</b><small>Con todas sus subcarpetas</small></span>
-      </button>
-    </div>
-    <p class="pick-hint">o arrastra aquí las fotos o la carpeta</p>
-    <input type="file" id="fileInput" accept="image/*" multiple hidden>
-    <input type="file" id="dirInput" webkitdirectory multiple hidden>
   </section>
+
+  <ul class="facts" id="facts">
+    <li><span><b>Todo en tu navegador.</b> Las fotos no salen de tu equipo.</span></li>
+    <li><span><b>Carpetas enteras.</b> Se descargan en un ZIP con su estructura.</span></li>
+    <li><span><b>Compara antes y después.</b> Un divisor sobre cada foto, a tamaño real.</span></li>
+  </ul>
+
+  <section class="toolbar" id="toolbar" hidden aria-label="Añadir más fotos">
+    <button type="button" class="addbtn yellow" data-pick="files">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      Añadir fotos
+    </button>
+    <button type="button" class="addbtn dark" data-pick="folder">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      Añadir carpeta
+    </button>
+    <span class="hint-r">o arrastra aquí más fotos</span>
+  </section>
+
+  <input type="file" id="fileInput" accept="image/*" multiple hidden>
+  <input type="file" id="dirInput" webkitdirectory multiple hidden>
 
   <p class="status" id="status" role="status" aria-live="polite"></p>
-
-  <section id="panel" aria-label="Ajustes de compresión" style="display:flex;flex-direction:column;gap:14px">
-    <div class="settings">
-      <section class="set">
-        <header class="set-head"><h3 id="hFmt">Formato</h3><span class="set-val" id="vFmt"></span></header>
-        <div class="set-body">
-          <div class="opts c2 c4w" role="radiogroup" aria-labelledby="hFmt">
-            <label class="opt"><input type="radio" name="fmt" value="orig" checked><span class="face"><b>Original</b><small>mismo formato</small></span></label>
-            <label class="opt"><input type="radio" name="fmt" value="jpeg"><span class="face"><b>JPG</b><small>compatible</small></span></label>
-            <label class="opt"><input type="radio" name="fmt" value="webp"><span class="face"><b>WebP</b><small>más ligero</small></span></label>
-            <label class="opt"><input type="radio" name="fmt" value="png"><span class="face"><b>PNG</b><small>sin pérdida</small></span></label>
-          </div>
-          <p class="hint" id="fmtHint"></p>
-        </div>
-      </section>
-
-      <section class="set">
-        <header class="set-head"><h3 id="hQual">Calidad</h3><span class="set-val" id="vQual"></span></header>
-        <div class="set-body">
-          <div class="opts c1" role="radiogroup" aria-labelledby="hQual">
-            <label class="opt"><input type="radio" name="qual" value="lig" checked><span class="face row"><b>Ligera</b><small>Calidad 70 · el menor peso</small></span></label>
-            <label class="opt"><input type="radio" name="qual" value="equ"><span class="face row"><b>Equilibrada</b><small>Calidad 82 · punto medio</small></span></label>
-            <label class="opt"><input type="radio" name="qual" value="casi"><span class="face row"><b>Casi sin pérdida</b><small>Calidad 92 · máxima fidelidad</small></span></label>
-          </div>
-          <p class="hint" id="qHint"></p>
-        </div>
-      </section>
-
-      <section class="set">
-        <header class="set-head"><h3 id="hRes">Resolución</h3><span class="set-val" id="vRes"></span></header>
-        <div class="set-body" role="radiogroup" aria-labelledby="hRes">
-          <div class="opts c1">
-            <label class="opt"><input type="radio" name="res" value="orig"><span class="face row"><b>Original</b><small>Mantener los píxeles de cada foto</small></span></label>
-          </div>
-          <p class="set-sub">Lado más largo, en píxeles</p>
-          <div class="opts c3">
-            <label class="opt"><input type="radio" name="res" value="px:2560"><span class="face"><b>2560</b><small>2K</small></span></label>
-            <label class="opt"><input type="radio" name="res" value="px:1920" checked><span class="face"><b>1920</b><small>Full HD</small></span></label>
-            <label class="opt"><input type="radio" name="res" value="px:1600"><span class="face"><b>1600</b><small>web</small></span></label>
-            <label class="opt"><input type="radio" name="res" value="px:1280"><span class="face"><b>1280</b><small>HD</small></span></label>
-            <label class="opt"><input type="radio" name="res" value="px:1024"><span class="face"><b>1024</b><small>email</small></span></label>
-            <label class="opt"><input type="radio" name="res" value="px:800"><span class="face"><b>800</b><small>pequeña</small></span></label>
-          </div>
-          <p class="set-sub">O por porcentaje del original</p>
-          <div class="opts c3">
-            <label class="opt"><input type="radio" name="res" value="pct:80"><span class="face"><b>80 %</b><small>leve</small></span></label>
-            <label class="opt"><input type="radio" name="res" value="pct:60"><span class="face"><b>60 %</b><small>media</small></span></label>
-            <label class="opt"><input type="radio" name="res" value="pct:50"><span class="face"><b>50 %</b><small>mitad</small></span></label>
-          </div>
-        </div>
-      </section>
-    </div>
-    <div class="setfoot">
-      <label class="check"><input type="checkbox" id="keep" checked><span>Conservar el original si no se reduce</span></label>
-      <p class="hint">Nunca se amplía una foto pequeña. Al exportar se eliminan los metadatos, incluida la ubicación GPS.</p>
-    </div>
-  </section>
 
   <section class="slab" id="summary" hidden aria-label="Resumen">
     <div class="slab-top">
@@ -426,6 +442,97 @@ img{max-width:100%}
 
   <ul class="sheet" id="list" hidden></ul>
 
+  <p class="foot" id="trust" hidden>Se procesa en tu navegador · nada se sube.</p>
+</div>
+
+<div class="veil" id="veil" hidden aria-hidden="true"><i></i><p class="xp">Suelta aquí<br>tus fotos o carpeta</p></div>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="drTitle">
+  <header class="dr-head">
+    <h2 id="drTitle" class="xp">Ajustes</h2>
+    <button type="button" class="xbtn" id="drClose" aria-label="Cerrar ajustes">×</button>
+  </header>
+  <div class="dr-body" id="panel">
+    <section class="set">
+      <header class="set-head"><h3 id="hFmt">Formato</h3><span class="set-val" id="vFmt"></span></header>
+      <div class="set-body">
+        <div class="opts c2" role="radiogroup" aria-labelledby="hFmt">
+          <label class="opt"><input type="radio" name="fmt" value="orig" checked><span class="face"><b>Original</b><small>mismo formato</small></span></label>
+          <label class="opt"><input type="radio" name="fmt" value="jpeg"><span class="face"><b>JPG</b><small>compatible</small></span></label>
+          <label class="opt"><input type="radio" name="fmt" value="webp"><span class="face"><b>WebP</b><small>más ligero</small></span></label>
+          <label class="opt"><input type="radio" name="fmt" value="png"><span class="face"><b>PNG</b><small>sin pérdida</small></span></label>
+        </div>
+        <p class="hint" id="fmtHint"></p>
+      </div>
+    </section>
+
+    <section class="set">
+      <header class="set-head"><h3 id="hQual">Calidad</h3><span class="set-val" id="vQual"></span></header>
+      <div class="set-body">
+        <div class="opts c1" role="radiogroup" aria-labelledby="hQual">
+          <label class="opt"><input type="radio" name="qual" value="lig" checked><span class="face row"><b>Ligera</b><small>Calidad 70 · el menor peso</small></span></label>
+          <label class="opt"><input type="radio" name="qual" value="equ"><span class="face row"><b>Equilibrada</b><small>Calidad 82 · punto medio</small></span></label>
+          <label class="opt"><input type="radio" name="qual" value="casi"><span class="face row"><b>Casi sin pérdida</b><small>Calidad 92 · máxima fidelidad</small></span></label>
+        </div>
+        <p class="hint" id="qHint"></p>
+      </div>
+    </section>
+
+    <section class="set">
+      <header class="set-head"><h3 id="hRes">Resolución</h3><span class="set-val" id="vRes"></span></header>
+      <div class="set-body" role="radiogroup" aria-labelledby="hRes">
+        <div class="opts c1">
+          <label class="opt"><input type="radio" name="res" value="orig"><span class="face row"><b>Original</b><small>Mantener los píxeles de cada foto</small></span></label>
+        </div>
+        <p class="set-sub">Lado más largo, en píxeles</p>
+        <div class="opts c3">
+          <label class="opt"><input type="radio" name="res" value="px:2560"><span class="face"><b>2560</b><small>2K</small></span></label>
+          <label class="opt"><input type="radio" name="res" value="px:1920" checked><span class="face"><b>1920</b><small>Full HD</small></span></label>
+          <label class="opt"><input type="radio" name="res" value="px:1600"><span class="face"><b>1600</b><small>web</small></span></label>
+          <label class="opt"><input type="radio" name="res" value="px:1280"><span class="face"><b>1280</b><small>HD</small></span></label>
+          <label class="opt"><input type="radio" name="res" value="px:1024"><span class="face"><b>1024</b><small>email</small></span></label>
+          <label class="opt"><input type="radio" name="res" value="px:800"><span class="face"><b>800</b><small>pequeña</small></span></label>
+        </div>
+        <p class="set-sub">O por porcentaje del original</p>
+        <div class="opts c3">
+          <label class="opt"><input type="radio" name="res" value="pct:80"><span class="face"><b>80 %</b><small>leve</small></span></label>
+          <label class="opt"><input type="radio" name="res" value="pct:60"><span class="face"><b>60 %</b><small>media</small></span></label>
+          <label class="opt"><input type="radio" name="res" value="pct:50"><span class="face"><b>50 %</b><small>mitad</small></span></label>
+        </div>
+      </div>
+    </section>
+
+    <section class="set">
+      <header class="set-head"><h3 id="hOrig">Originales</h3><span class="set-val" id="vOrig"></span></header>
+      <div class="set-body">
+        <div class="opts c1" role="radiogroup" aria-labelledby="hOrig">
+          <label class="opt"><input type="radio" name="orig" value="keep" checked><span class="face row"><b>Conservar los originales</b><small>No se toca ningún archivo; descargas el resultado</small></span></label>
+          <label class="opt"><input type="radio" name="orig" value="replace" id="optReplace"><span class="face row"><b>Quedarme solo con el resultado</b><small>Cada foto se sustituye por su versión comprimida</small></span></label>
+        </div>
+        <p class="hint" id="origHint"></p>
+        <p class="note" id="origNote" hidden></p>
+      </div>
+    </section>
+
+    <label class="check"><input type="checkbox" id="keep" checked><span>Si la versión comprimida pesa más, usar la foto original</span></label>
+    <p class="hint">Nunca se amplía una foto pequeña. Al exportar se eliminan los metadatos, incluida la ubicación GPS.</p>
+  </div>
+  <footer class="dr-foot">
+    <span class="dr-sum" id="drSum"></span>
+    <button type="button" class="btn primary" id="drDone">Listo</button>
+  </footer>
+</aside>
+
+<div class="modal" id="cfm" hidden role="alertdialog" aria-modal="true" aria-labelledby="cfmTitle" aria-describedby="cfmText">
+  <div class="dialog">
+    <h2 id="cfmTitle" class="xp">¿Reemplazar los originales?</h2>
+    <p id="cfmText"></p>
+    <div class="acts">
+      <button type="button" class="btn primary" id="cfmNo">Cancelar</button>
+      <button type="button" class="btn danger" id="cfmYes">Sí, reemplazar</button>
+    </div>
+  </div>
 </div>
 
 <div class="viewer" id="viewer" hidden role="dialog" aria-modal="true" aria-label="Comparar original y comprimida">
@@ -556,6 +663,12 @@ const MAX_WORKERS = 2;
 const rows = new Map();
 let statusTimer = 0;
 let dl = undefined; // undefined: sin comprobar, null: no disponible
+let replacing = false;
+let pendingReplace = [];
+
+// Reemplazar originales necesita acceso de escritura a carpetas: solo Chrome o Edge, en una pestaña propia (no dentro de un marco).
+const FS_API = typeof window.showDirectoryPicker === 'function';
+const FS_OK = (() => { try { return FS_API && window.top === window.self; } catch (_) { return false; } })();
 
 /* ---------- Ajustes ---------- */
 const keepEl = $('#keep');
@@ -575,9 +688,12 @@ function readSettings() {
     res: kind,
     maxSide: kind === 'side' ? num : 1920,
     pct: kind === 'pct' ? num : 100,
-    keep: keepEl.checked
+    keep: keepEl.checked,
+    orig: document.querySelector('input[name=orig]:checked').value
   };
 }
+
+const procKey = (s) => JSON.stringify([s.fmt, s.q, s.res, s.maxSide, s.pct, s.keep]);
 
 const FMT_HINTS = {
   orig: 'Cada foto mantiene su formato (JPEG, PNG o WebP). Cualquier otro formato pasa a JPEG.',
@@ -585,6 +701,14 @@ const FMT_HINTS = {
   webp: 'Suele pesar menos que JPEG con una calidad visual parecida.',
   png: 'Sin pérdida, pero las fotos pesan mucho. Para reducir el peso, baja la resolución.'
 };
+
+function summaryText(s) {
+  const p = [s.fmt === 'orig' ? 'Formato original' : FMT_NAMES[s.fmt]];
+  if (s.fmt !== 'png') p.push(QUAL_NAMES[s.qual]);
+  p.push(s.res === 'orig' ? 'Resolución original' : s.res === 'side' ? s.maxSide + ' px' : s.pct + ' %');
+  if (s.orig === 'replace' && FS_OK) p.push('Reemplazar originales');
+  return p.join(' · ');
+}
 
 function updateUi() {
   const s = readSettings();
@@ -599,42 +723,102 @@ function updateUi() {
       ? 'Se aplica a JPEG y WebP. Los PNG no cambian de calidad.'
       : 'Abre una foto de la lista para comparar el resultado con el original.';
   $('#vRes').textContent = s.res === 'orig' ? 'Original' : s.res === 'side' ? s.maxSide + ' px' : s.pct + ' %';
+  const rep = s.orig === 'replace';
+  $('#vOrig').textContent = rep && FS_OK ? 'Reemplazar' : 'Conservar';
+  const hint = $('#origHint'), note = $('#origNote');
+  if (!FS_OK) {
+    hint.textContent = 'Solo se puede reemplazar con Chrome o Edge en el ordenador, y con la página abierta en su propia pestaña (no dentro de claude.ai ni de otra página).';
+    note.hidden = true;
+  } else if (!rep) {
+    hint.textContent = 'Para quedarte solo con el resultado, marca la segunda opción. Solo funciona con carpetas.';
+    note.hidden = true;
+  } else {
+    hint.textContent = '';
+    let t = 'Se borrarán los originales y no se podrán recuperar. Después de marcar esta opción, elige la carpeta con «Elegir carpeta» (o arrástrala). Te pediremos permiso y confirmación antes de tocar nada.';
+    if (state.items.some((i) => !i.dir && !i.replaced)) t += ' Las fotos que ya están cargadas no se pueden reemplazar: vuelve a elegir la carpeta.';
+    note.textContent = t;
+    note.hidden = false;
+  }
+  const sum = summaryText(s);
+  $('#setSum').textContent = sum;
+  $('#coverSum').textContent = sum;
 }
 
 function applySettings() {
   const s = readSettings();
-  if (state.settings && JSON.stringify(s) === JSON.stringify(state.settings)) return;
+  const changed = !state.settings || procKey(s) !== procKey(state.settings);
   state.settings = s;
-  epoch++;
-  for (const it of state.items) if (it.status !== 'working') it.status = 'queued';
-  state.items.forEach(updateRow);
+  if (changed) {
+    epoch++;
+    for (const it of state.items) if (it.status !== 'working' && !it.replaced) it.status = 'queued';
+    state.items.forEach(updateRow);
+    pump();
+  }
   renderSummary();
-  pump();
 }
 function applyNow() { updateUi(); applySettings(); }
 
 $('#panel').addEventListener('change', applyNow);
 
+/* ---------- Panel de ajustes ---------- */
+const DR = { el: $('#drawer'), scrim: $('#scrim'), last: null };
+const C = { el: $('#cfm') };
+
+function syncLock() {
+  const open = !V.el.hidden || !DR.el.hidden || !C.el.hidden;
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+function openDrawer() {
+  if (!DR.el.hidden) return;
+  DR.last = document.activeElement;
+  DR.scrim.hidden = false;
+  DR.el.hidden = false;
+  syncLock();
+  $('#drClose').focus();
+}
+function closeDrawer() {
+  if (DR.el.hidden) return;
+  DR.scrim.hidden = true;
+  DR.el.hidden = true;
+  syncLock();
+  if (DR.last && DR.last.focus) DR.last.focus();
+}
+$('#openSettings').addEventListener('click', openDrawer);
+$('#coverSet').addEventListener('click', openDrawer);
+$('#drClose').addEventListener('click', closeDrawer);
+$('#drDone').addEventListener('click', closeDrawer);
+DR.scrim.addEventListener('click', closeDrawer);
+
+function trapFocus(root, e) {
+  const f = Array.from(root.querySelectorAll('button:not(:disabled),input:not(:disabled),a[href]')).filter((x) => x.offsetParent !== null);
+  if (!f.length) return;
+  const first = f[0], last = f[f.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+}
+
 /* ---------- Entrada de archivos ---------- */
-function setStatus(msg, bad) {
+function setStatus(msg, bad, persist) {
   const el = $('#status');
   el.textContent = msg || '';
   el.classList.toggle('bad', !!bad);
   clearTimeout(statusTimer);
-  if (msg) statusTimer = setTimeout(() => { el.textContent = ''; el.classList.remove('bad'); }, 7000);
+  if (msg && !persist) statusTimer = setTimeout(() => { el.textContent = ''; el.classList.remove('bad'); }, 7000);
 }
 
+const IMG_RE = /\.(jpe?g|png|webp|gif|bmp|avif|heic|heif)$/i;
 function isImage(file) {
-  return (file.type && file.type.startsWith('image/')) || /\.(jpe?g|png|webp|gif|bmp|avif|heic|heif)$/i.test(file.name);
+  return (file.type && file.type.startsWith('image/')) || IMG_RE.test(file.name);
 }
 
 function addFiles(list) {
   let skipped = 0, added = 0;
   if (!state.settings) state.settings = readSettings();
-  for (const { file, path } of list) {
-    if (!isImage(file)) { skipped++; continue; }
+  for (const e of list) {
+    if (!isImage(e.file)) { skipped++; continue; }
     state.items.push({
-      id: nextId++, file, path: path || file.name, origSize: file.size,
+      id: nextId++, file: e.file, path: e.path || e.file.name, origSize: e.file.size,
+      handle: e.handle || null, dir: e.dir || null, root: e.root || null, replaced: false,
       status: 'queued', out: null, outType: '', ow: 0, oh: 0, w: 0, h: 0,
       kept: false, note: '', error: '', thumbUrl: ''
     });
@@ -643,7 +827,7 @@ function addFiles(list) {
   if (skipped) setStatus(skipped + (skipped === 1 ? ' archivo ignorado' : ' archivos ignorados') + ' porque no son imágenes.', true);
   else if (!added) setStatus('No se encontraron imágenes.', true);
   syncRows();
-  renderSummary();
+  updateUi();
   applySettings();
   pump();
 }
@@ -662,37 +846,81 @@ async function readEntry(entry, out) {
   }
 }
 
-const drop = $('#drop');
+// Recorre una carpeta con permisos de archivo (Chrome/Edge) y guarda dónde vive cada foto para poder reemplazarla.
+async function walkDir(dir, rel, root, out) {
+  for await (const [name, h] of dir.entries()) {
+    if (h.kind === 'file') {
+      if (!IMG_RE.test(name)) continue;
+      out.push({ file: await h.getFile(), path: rel + name, handle: h, dir, root });
+    } else if (h.kind === 'directory') {
+      await walkDir(h, rel + name + '/', root, out);
+    }
+  }
+}
+
+async function pickFolder() {
+  if (FS_OK && readSettings().orig === 'replace') {
+    try {
+      const dir = await window.showDirectoryPicker({ id: 'compresor-fotos' });
+      setStatus('Leyendo carpeta…');
+      const out = [];
+      await walkDir(dir, dir.name + '/', dir, out);
+      setStatus('');
+      addFiles(out);
+    } catch (e) {
+      setStatus('');
+      if (!e || e.name !== 'AbortError') setStatus('No se pudo abrir esa carpeta. Prueba con otra o arrástrala a la página.', true);
+    }
+    return;
+  }
+  $('#dirInput').click();
+}
+
+document.querySelectorAll('[data-pick=files]').forEach((b) => b.addEventListener('click', () => $('#fileInput').click()));
+document.querySelectorAll('[data-pick=folder]').forEach((b) => b.addEventListener('click', pickFolder));
+
+const veil = $('#veil');
 let dragDepth = 0;
-document.addEventListener('dragenter', (e) => { e.preventDefault(); dragDepth++; drop.classList.add('over'); });
-document.addEventListener('dragover', (e) => { e.preventDefault(); });
-document.addEventListener('dragleave', () => { dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) drop.classList.remove('over'); });
+const hasFiles = (e) => !!(e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files'));
+document.addEventListener('dragenter', (e) => { if (!hasFiles(e)) return; e.preventDefault(); dragDepth++; veil.hidden = false; });
+document.addEventListener('dragover', (e) => { if (hasFiles(e)) e.preventDefault(); });
+document.addEventListener('dragleave', () => { dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) veil.hidden = true; });
 document.addEventListener('drop', async (e) => {
   e.preventDefault();
   dragDepth = 0;
-  drop.classList.remove('over');
+  veil.hidden = true;
   const dt = e.dataTransfer;
-  if (!dt) return;
+  if (!dt || !hasFiles(e)) return;
   const entries = [];
+  const handles = [];
   const out = [];
+  const wantHandles = FS_OK && readSettings().orig === 'replace';
   if (dt.items && dt.items.length) {
     for (const item of dt.items) {
       if (item.kind !== 'file') continue;
+      const hp = wantHandles && typeof item.getAsFileSystemHandle === 'function' ? item.getAsFileSystemHandle() : null;
       const en = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
-      if (en) entries.push(en);
+      if (hp) handles.push(hp);
+      else if (en) entries.push(en);
       else { const f = item.getAsFile(); if (f) out.push({ file: f, path: f.name }); }
     }
   } else {
     for (const f of dt.files) out.push({ file: f, path: f.name });
   }
   setStatus('Leyendo archivos…');
+  for (const hp of handles) {
+    try {
+      const h = await hp;
+      if (!h) continue;
+      if (h.kind === 'directory') await walkDir(h, h.name + '/', h, out);
+      else out.push({ file: await h.getFile(), path: h.name });
+    } catch (_) { /* elemento ilegible */ }
+  }
   for (const en of entries) { try { await readEntry(en, out); } catch (_) { /* carpeta ilegible */ } }
   setStatus('');
   addFiles(out);
 });
 
-$('#pickFiles').addEventListener('click', () => $('#fileInput').click());
-$('#pickFolder').addEventListener('click', () => $('#dirInput').click());
 function fromInput(input) {
   const list = Array.from(input.files || []).map((f) => ({ file: f, path: f.webkitRelativePath || f.name }));
   input.value = '';
@@ -835,7 +1063,7 @@ function createRow(it) {
   el.className = 'card';
   el.innerHTML =
     '<button type="button" class="shot" aria-label="Comparar original y comprimida">' +
-      '<img alt=""><span class="n"></span><span class="fmt"></span><span class="cmp">Comparar</span><span class="spin"></span>' +
+      '<img alt=""><span class="n"></span><span class="fmt"></span><span class="cmp">Comparar</span><span class="rep" hidden>✓ Reemplazada</span><span class="spin"></span>' +
     '</button>' +
     '<div class="cbody">' +
       '<div class="cname"></div><div class="cdims"></div>' +
@@ -849,6 +1077,7 @@ function createRow(it) {
     img: el.querySelector('img'),
     n: el.querySelector('.n'),
     fmt: el.querySelector('.fmt'),
+    rep: el.querySelector('.rep'),
     name: el.querySelector('.cname'),
     dims: el.querySelector('.cdims'),
     fill: el.querySelector('.wbar i'),
@@ -878,7 +1107,10 @@ function syncRows() {
   const has = state.items.length > 0;
   list.hidden = !has;
   $('#summary').hidden = !has;
-  drop.classList.toggle('compact', has);
+  $('#cover').hidden = has;
+  $('#facts').hidden = has;
+  $('#toolbar').hidden = !has;
+  $('#trust').hidden = !has;
 }
 
 function updateRow(it) {
@@ -888,7 +1120,8 @@ function updateRow(it) {
   r.el.classList.toggle('busy', busy);
   r.el.classList.toggle('err', it.status === 'error');
   r.n.textContent = pad2(state.items.indexOf(it) + 1);
-  r.shot.disabled = it.status !== 'done';
+  r.shot.disabled = it.status !== 'done' || it.replaced;
+  r.rep.hidden = !it.replaced;
   if (it.thumbUrl && r.img.getAttribute('src') !== it.thumbUrl) r.img.src = it.thumbUrl;
   if (it.status === 'error') {
     r.fmt.textContent = '';
@@ -929,23 +1162,29 @@ function zipName(list) {
   return (clean || 'fotos') + '-comprimidas.zip';
 }
 
+const replaceable = (list) => list.length > 0 && list.every((i) => i.dir && i.root);
+const plural = (n, a, b) => n + ' ' + (n === 1 ? a : b);
+
 function renderSummary() {
   const total = state.items.length;
-  if (!total) return;
+  if (!total) { $('#drSum').textContent = 'Los ajustes se aplican a las fotos que añadas.'; return; }
   const done = state.items.filter((i) => i.status === 'done');
+  const live = done.filter((i) => !i.replaced);
   const pending = state.items.filter((i) => i.status === 'queued' || i.status === 'working').length;
   const errors = state.items.filter((i) => i.status === 'error').length;
   const orig = done.reduce((a, i) => a + i.origSize, 0);
   const out = done.reduce((a, i) => a + i.out.size, 0);
-  let count = total + (total === 1 ? ' foto' : ' fotos');
+  let count = plural(total, 'foto', 'fotos');
   if (pending) count += ' · procesando ' + (total - pending - errors) + ' de ' + (total - errors);
   if (errors) count += ' · ' + errors + ' con error';
   $('#sumCount').textContent = count;
   $('#sumFrom').textContent = fmtBytes(orig);
   $('#sumTo').textContent = fmtBytes(out);
   const big = $('#sumPct'), cap = $('#sumCap'), meter = $('#meterFill');
+  let pillText = '';
   if (done.length && orig > 0) {
     const p = pillFor(orig, out, false);
+    pillText = p.text;
     big.textContent = p.text.replace(' ', ' ');
     cap.textContent = out <= orig ? 'de ahorro' : 'de aumento';
     meter.style.width = Math.min(100, out / orig * 100) + '%';
@@ -954,20 +1193,35 @@ function renderSummary() {
     cap.textContent = 'de ahorro';
     meter.style.width = '0%';
   }
+  $('#drSum').textContent = pending
+    ? 'Aplicando los ajustes…'
+    : done.length ? plural(total, 'foto', 'fotos') + ' · ' + pillText + ' (' + fmtBytes(orig) + ' → ' + fmtBytes(out) + ')' : '';
   $('#bar').hidden = !pending;
   $('#barFill').style.width = Math.round(((total - pending) / total) * 100) + '%';
+
   const btn = $('#dlAll'), lbl = $('#dlLabel'), sub = $('#dlSub');
-  btn.disabled = pending > 0 || done.length === 0;
-  if (pending) { lbl.textContent = 'Procesando…'; sub.textContent = 'Un momento'; }
-  else if (done.length === 1) { lbl.textContent = 'Descargar foto'; sub.textContent = outName(done[0], false); }
-  else if (done.length > 1) { lbl.textContent = 'Descargar todo en ZIP'; sub.textContent = done.length + ' fotos · ' + zipName(done); }
-  else { lbl.textContent = 'Descargar'; sub.textContent = 'No hay fotos listas'; }
+  const rep = state.settings.orig === 'replace' && FS_OK;
+  btn.disabled = pending > 0 || live.length === 0 || replacing;
+  if (replacing) { lbl.textContent = 'Reemplazando…'; sub.textContent = 'No cierres la página'; }
+  else if (pending) { lbl.textContent = 'Procesando…'; sub.textContent = 'Un momento'; }
+  else if (done.length && !live.length) { lbl.textContent = 'Originales reemplazados'; sub.textContent = plural(done.length, 'foto', 'fotos') + ' · ya están en tu carpeta'; }
+  else if (rep && replaceable(live)) {
+    lbl.textContent = 'Reemplazar originales';
+    sub.textContent = plural(live.length, 'foto', 'fotos') + ' · se borrarán los originales';
+  } else if (live.length === 1) {
+    lbl.textContent = 'Descargar foto';
+    sub.textContent = outName(live[0], false) + (rep ? ' · para reemplazar, elige una carpeta' : '');
+  } else if (live.length > 1) {
+    lbl.textContent = 'Descargar todo en ZIP';
+    sub.textContent = live.length + ' fotos · ' + zipName(live) + (rep ? ' · para reemplazar, vuelve a elegir la carpeta' : '');
+  } else { lbl.textContent = 'Descargar'; sub.textContent = 'No hay fotos listas'; }
 }
 
 function removeItem(it) {
   state.items = state.items.filter((i) => i !== it);
   if (it.thumbUrl) URL.revokeObjectURL(it.thumbUrl);
   syncRows();
+  updateUi();
   renderSummary();
 }
 
@@ -976,6 +1230,7 @@ $('#clearAll').addEventListener('click', () => {
   for (const it of state.items) if (it.thumbUrl) URL.revokeObjectURL(it.thumbUrl);
   state.items = [];
   syncRows();
+  updateUi();
   setStatus('');
 });
 
@@ -1016,7 +1271,7 @@ function revokeViewerUrls() {
 }
 
 function openViewer(it) {
-  if (!it || it.status !== 'done') return;
+  if (!it || it.status !== 'done' || it.replaced) return;
   const wasOpen = !V.el.hidden;
   if (!wasOpen) V.last = document.activeElement;
   revokeViewerUrls();
@@ -1029,12 +1284,12 @@ function openViewer(it) {
   $('#vName').textContent = it.path;
   $('#vSizeA').textContent = fmtBytes(it.origSize) + ' · ' + it.ow + '×' + it.oh + ' px';
   $('#vSizeB').textContent = (it.kept ? 'sin cambios' : fmtBytes(it.out.size) + ' · ' + it.w + '×' + it.h + ' px');
-  const list = state.items.filter((i) => i.status === 'done');
+  const list = state.items.filter((i) => i.status === 'done' && !i.replaced);
   const idx = list.indexOf(it);
   $('#vPrev').disabled = idx <= 0;
   $('#vNext').disabled = idx >= list.length - 1;
   V.el.hidden = false;
-  document.body.style.overflow = 'hidden';
+  syncLock();
   setSplit(50);
   layoutViewer();
   if (!wasOpen) $('#vClose').focus();
@@ -1043,7 +1298,7 @@ function openViewer(it) {
 function closeViewer() {
   if (V.el.hidden) return;
   V.el.hidden = true;
-  document.body.style.overflow = '';
+  syncLock();
   V.a.removeAttribute('src');
   V.b.removeAttribute('src');
   revokeViewerUrls();
@@ -1052,7 +1307,7 @@ function closeViewer() {
 }
 
 function stepViewer(d) {
-  const list = state.items.filter((i) => i.status === 'done');
+  const list = state.items.filter((i) => i.status === 'done' && !i.replaced);
   const n = list[list.indexOf(V.item) + d];
   if (n) openViewer(n);
 }
@@ -1073,17 +1328,113 @@ $('#vNext').addEventListener('click', () => stepViewer(1));
 $('#vZoom').addEventListener('click', () => { V.zoom = !V.zoom; layoutViewer(); });
 window.addEventListener('resize', () => { if (!V.el.hidden) layoutViewer(); });
 document.addEventListener('keydown', (e) => {
-  if (V.el.hidden) return;
-  if (e.key === 'Escape') { e.preventDefault(); closeViewer(); }
-  else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && document.activeElement !== V.range) { e.preventDefault(); stepViewer(e.key === 'ArrowLeft' ? -1 : 1); }
-  else if (e.key === 'Tab') {
-    const f = Array.from(V.el.querySelectorAll('button:not(:disabled),input')).filter((x) => x.offsetParent !== null);
-    if (!f.length) return;
-    const first = f[0], last = f[f.length - 1];
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  if (!C.el.hidden) {
+    if (e.key === 'Escape') { e.preventDefault(); closeConfirm(); }
+    else if (e.key === 'Tab') trapFocus(C.el, e);
+    return;
+  }
+  if (!V.el.hidden) {
+    if (e.key === 'Escape') { e.preventDefault(); closeViewer(); }
+    else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && document.activeElement !== V.range) { e.preventDefault(); stepViewer(e.key === 'ArrowLeft' ? -1 : 1); }
+    else if (e.key === 'Tab') trapFocus(V.el, e);
+    return;
+  }
+  if (!DR.el.hidden) {
+    if (e.key === 'Escape') { e.preventDefault(); closeDrawer(); }
+    else if (e.key === 'Tab') trapFocus(DR.el, e);
   }
 });
+
+/* ---------- Reemplazar originales ---------- */
+function openConfirm(list) {
+  pendingReplace = list;
+  const roots = Array.from(new Set(list.map((i) => i.root && i.root.name).filter(Boolean)));
+  const where = roots.length === 1 ? 'la carpeta «' + roots[0] + '»' : 'tus carpetas';
+  $('#cfmText').textContent = 'Se sustituirán ' + plural(list.length, 'foto', 'fotos') + ' de ' + where + ' por su versión comprimida. Los originales se borrarán y no se podrán recuperar.';
+  C.el.hidden = false;
+  syncLock();
+  $('#cfmNo').focus();
+}
+function closeConfirm() {
+  C.el.hidden = true;
+  syncLock();
+}
+$('#cfmNo').addEventListener('click', closeConfirm);
+$('#cfmYes').addEventListener('click', () => {
+  const list = pendingReplace;
+  closeConfirm();
+  doReplace(list);
+});
+
+async function fileExists(dir, name) {
+  try { return await dir.getFileHandle(name); }
+  catch (e) { if (e && e.name === 'NotFoundError') return null; throw e; }
+}
+
+async function replaceOne(it) {
+  const out = it.out;
+  const oldName = it.handle.name;
+  const wanted = outName(it, false);
+  const dot = wanted.lastIndexOf('.');
+  const stem = dot > 0 ? wanted.slice(0, dot) : wanted;
+  const ext = dot > 0 ? wanted.slice(dot) : '';
+  // Nunca se pisa otro archivo distinto: si el nombre nuevo ya existe, se numera.
+  let target = wanted, same = false;
+  for (let n = 2; n < 1000; n++) {
+    const found = await fileExists(it.dir, target);
+    if (!found) break;
+    if (await found.isSameEntry(it.handle)) { same = true; break; }
+    target = stem + ' (' + n + ')' + ext;
+  }
+  const fh = await it.dir.getFileHandle(target, { create: true });
+  const w = await fh.createWritable();
+  await w.write(out);
+  await w.close();
+  const written = await fh.getFile();
+  if (written.size !== out.size) throw new Error('La verificación del archivo escrito no coincide.');
+  // El original solo se borra cuando el resultado ya está guardado y verificado.
+  if (!same && target !== oldName) await it.dir.removeEntry(oldName);
+}
+
+async function doReplace(list) {
+  if (replacing) return;
+  const roots = Array.from(new Set(list.map((i) => i.root)));
+  try {
+    for (const r of roots) {
+      let p = typeof r.queryPermission === 'function' ? await r.queryPermission({ mode: 'readwrite' }) : 'granted';
+      if (p !== 'granted' && typeof r.requestPermission === 'function') p = await r.requestPermission({ mode: 'readwrite' });
+      if (p !== 'granted') {
+        setStatus('No se concedió permiso para modificar la carpeta. No se ha cambiado ningún archivo.', true, true);
+        return;
+      }
+    }
+  } catch (_) {
+    setStatus('No se pudo pedir permiso a la carpeta. No se ha cambiado ningún archivo.', true, true);
+    return;
+  }
+  replacing = true;
+  renderSummary();
+  let ok = 0, same = 0, fail = 0, n = 0;
+  for (const it of list) {
+    n++;
+    setStatus('Reemplazando ' + n + ' de ' + list.length + '…', false, true);
+    try {
+      if (it.kept) { same++; it.replaced = true; }
+      else { await replaceOne(it); ok++; it.replaced = true; }
+    } catch (e) {
+      fail++;
+      it.note = 'No se pudo reemplazar. El original sigue intacto.';
+    }
+    updateRow(it);
+  }
+  replacing = false;
+  let msg = 'Listo: ' + plural(ok, 'foto reemplazada', 'fotos reemplazadas');
+  if (same) msg += ' · ' + plural(same, 'ya estaba como mejor versión', 'ya estaban como mejor versión');
+  if (fail) msg += ' · ' + plural(fail, 'con error (sin tocar)', 'con error (sin tocar)');
+  setStatus(msg + '.', fail > 0, true);
+  updateUi();
+  renderSummary();
+}
 
 /* ---------- Descargas ---------- */
 function showDlNote() { const n = $('#dlNote'); if (n) n.hidden = false; }
@@ -1146,29 +1497,32 @@ async function saveOne(it, btn) {
 }
 
 $('#dlAll').addEventListener('click', async () => {
+  const live = state.items.filter((i) => i.status === 'done' && !i.replaced);
+  if (!live.length || replacing) return;
+  if (state.settings.orig === 'replace' && FS_OK && replaceable(live)) { openConfirm(live); return; }
   const d = await getDl();
   if (!d) { showDlNote(); return; }
-  const done = state.items.filter((i) => i.status === 'done');
-  if (!done.length) return;
   const btn = $('#dlAll');
   btn.disabled = true;
   try {
-    if (done.length === 1) {
-      await d.save({ filename: outName(done[0], false), data: done[0].out });
+    if (live.length === 1) {
+      await d.save({ filename: outName(live[0], false), data: live[0].out });
     } else {
       $('#dlLabel').textContent = 'Preparando ZIP…';
       const used = new Set();
-      const files = done.map((it) => ({ name: uniqueName(outName(it, true), used), blob: it.out }));
+      const files = live.map((it) => ({ name: uniqueName(outName(it, true), used), blob: it.out }));
       const zip = await buildZip(files);
-      await d.save({ filename: zipName(done), data: zip });
+      await d.save({ filename: zipName(live), data: zip });
     }
   } catch (e) { dlError(e); }
   finally { renderSummary(); }
 });
 
 /* ---------- Arranque ---------- */
+$('#optReplace').disabled = !FS_OK;
 updateUi();
 state.settings = readSettings();
+renderSummary();
 getDl();
 })();
 </script>
