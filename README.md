@@ -6,7 +6,9 @@ Herramienta web para reducir el peso de muchas fotos de una vez, sin subirlas a 
 
 - Suelta varias fotos o una carpeta entera (la estructura de carpetas se conserva en el ZIP).
 - Elige el formato de salida: original, JPEG, WebP o PNG.
-- Ajusta la calidad (30–100) y la resolución: original, límite del lado mayor en píxeles o porcentaje. Nunca amplía una foto pequeña.
+- Elige la calidad: Ligera (por defecto), Equilibrada o Casi sin pérdida.
+- Elige la resolución: original, lado más largo de 2560 a 800 px (1920 por defecto) o porcentaje (80, 60 o 50 %). Nunca amplía una foto pequeña.
+- Con una carpeta, descarga todo en un ZIP con el nombre de la carpeta.
 - Muestra el peso antes y después de cada foto y el ahorro total.
 - Comparador antes/después con divisor y vista 1:1 para comprobar la calidad.
 - Descarga cada foto por separado o todas en un ZIP.
