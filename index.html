@@ -4,8 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="Comprime varias fotos o carpetas completas en tu navegador: elige formato, calidad y resolución. Nada se sube a ningún servidor.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='2' width='28' height='28' rx='5' fill='%23ffc400' stroke='%23121214' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23121214'/%3E%3C/svg%3E">
-<title>Compresor de Fotos</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='3' y='3' width='58' height='58' rx='13' fill='%23ffc400' stroke='%23121214' stroke-width='5'/%3E%3Ccircle cx='22' cy='23' r='6' fill='%23121214'/%3E%3Cpath d='M8 51 L26 32 L37 43 L45 35 L58 51 Z' fill='%23121214'/%3E%3C/svg%3E">
+<title>Compresor de Fotos · por Pablo</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='3' y='3' width='58' height='58' rx='13' fill='%23ffc400' stroke='%23121214' stroke-width='5'/%3E%3Ccircle cx='22' cy='23' r='6' fill='%23121214'/%3E%3Cpath d='M8 51 L26 32 L37 43 L45 35 L58 51 Z' fill='%23121214'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -80,11 +81,11 @@ button:disabled{cursor:not-allowed;opacity:.5}
 .mark{width:30px;height:30px;border-radius:5px;background:var(--signal);border:2px solid var(--rule);display:grid;place-items:center;flex:none}
 .mark i{display:block;width:12px;height:12px;border-radius:50%;background:var(--signal-ink)}
 .brand-name{font-size:16px;letter-spacing:.02em;text-transform:uppercase;line-height:1.1}
-.setbtn{display:flex;align-items:center;gap:10px;border:1.5px solid var(--rule);background:var(--surface);border-radius:6px;padding:9px 14px;cursor:pointer;font-weight:700;font-size:15px;line-height:1.2;min-width:0}
+.setbtn{display:flex;align-items:center;gap:10px;border:1.5px solid var(--rule);background:var(--surface);border-radius:6px;padding:12px 20px;cursor:pointer;font-weight:700;font-size:19px;line-height:1.2;min-width:0}
 .setbtn:hover{background:var(--surface-2)}
-.setbtn svg{width:20px;height:20px;flex:none}
-.setsum{font:500 12px/1.2 var(--font-mono);color:var(--ink-2);padding-left:10px;border-left:1px solid var(--line);max-width:52ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-@media (max-width:980px){.setsum{display:none}}
+.setbtn svg{width:26px;height:26px;flex:none}
+.setsum{font:600 16px/1.2 var(--font-mono);color:var(--ink-2);padding-left:14px;border-left:1px solid var(--line);max-width:60ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:1180px){.setsum{display:none}}
 
 /* Portada */
 .cover{
@@ -124,15 +125,15 @@ button:disabled{cursor:not-allowed;opacity:.5}
 .pbtn small{display:block;font:500 13px/1.3 var(--font-mono);margin-top:5px;opacity:.82}
 .pbtn.yellow{background:var(--signal);color:var(--signal-ink);border-color:var(--signal-ink)}
 .pbtn.dark{background:var(--band);color:var(--band-ink)}
-.cover-meta{margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;font:500 12.5px/1.4 var(--font-mono);color:var(--ink-2)}
+.cover-meta{margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;font:600 clamp(16px,1.35vw,21px)/1.4 var(--font-mono);color:var(--ink-2)}
 .setcover{min-height:clamp(72px,6vw,92px);width:100%}
 .setcover small{font-size:14px}
 .linkbtn{border:0;background:transparent;padding:0;cursor:pointer;font:600 12.5px/1.4 var(--font-mono);color:var(--ink);text-align:left}
 .linkbtn u{text-underline-offset:3px}
 .linkbtn:hover{color:var(--ink-2)}
 .facts{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 28px}
-.facts li{display:flex;align-items:flex-start;gap:10px;font:500 12.5px/1.45 var(--font-mono);color:var(--ink-2)}
-.facts li::before{content:"";flex:none;width:9px;height:9px;margin-top:4px;border-radius:2px;background:var(--signal);border:1.5px solid var(--rule)}
+.facts li{display:flex;align-items:flex-start;gap:14px;font:500 clamp(16px,1.3vw,20px)/1.45 var(--font-mono);color:var(--ink-2)}
+.facts li::before{content:"";flex:none;width:12px;height:12px;margin-top:7px;border-radius:2px;background:var(--signal);border:1.5px solid var(--rule)}
 .facts b{color:var(--ink);font-weight:600}
 @media (max-width:760px){.facts{grid-template-columns:minmax(0,1fr)}}
 
@@ -248,7 +249,7 @@ button:disabled{cursor:not-allowed;opacity:.5}
 }
 
 /* Hoja de contactos */
-.sheet{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:14px}
+.sheet{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,max(285px,calc((100% - 98px)/8))),1fr));gap:14px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
 .card:hover{border-color:var(--rule)}
 .shot{position:relative;display:block;width:100%;aspect-ratio:4/3;padding:0;border:0;background:var(--surface-2);cursor:zoom-in;overflow:hidden}
@@ -285,7 +286,9 @@ button:disabled{cursor:not-allowed;opacity:.5}
 .rm{width:30px;height:30px;border-radius:4px;border:1px solid transparent;background:transparent;cursor:pointer;font-size:20px;line-height:1;color:var(--ink-2)}
 .rm:hover{border-color:var(--line);color:var(--ink)}
 @media (prefers-reduced-motion:reduce){.spin::after{animation:none}.drawer:not([hidden]){animation:none}.meter i,.bar i,.wbar i,.shot .cmp,.pbtn,.dlbig,.addbtn{transition:none}}
-.foot{font:400 12.5px/1.5 var(--font-mono);color:var(--ink-2);margin:0}
+.foot{font:500 clamp(16px,1.3vw,20px)/1.5 var(--font-mono);color:var(--ink-2);margin:0}
+.credit{margin:8px 0 0;padding-top:18px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px 18px;font:600 clamp(15px,1.2vw,18px)/1.4 var(--font-mono);color:var(--ink-2)}
+.credit b{color:var(--ink);font-weight:800}
 @media (max-width:520px){
   .sheet{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .cbody{padding:10px}
@@ -314,12 +317,15 @@ button:disabled{cursor:not-allowed;opacity:.5}
 /* Comparador */
 .viewer{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;background:var(--stage);color:var(--stage-ink);
   padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
-.v-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-bottom:1px solid var(--stage-line)}
+.v-top{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 20px;border-bottom:1px solid var(--stage-line)}
 .v-title{display:flex;align-items:center;gap:10px;min-width:0}
-.v-frame{font:600 11px/1 var(--font-mono);padding:4px 6px;border-radius:3px;background:#ffc400;color:#121214;flex:none}
-.v-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.v-btns{display:flex;gap:6px;flex:none}
-.vbtn{border:1px solid var(--stage-line);background:transparent;color:var(--stage-ink);border-radius:4px;padding:7px 12px;min-width:40px;font:500 13px/1.2 var(--font-mono);cursor:pointer}
+.v-frame{font:700 16px/1 var(--font-mono);padding:7px 10px;border-radius:3px;background:#ffc400;color:#121214;flex:none}
+.v-name{font-weight:600;font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v-btns{display:flex;gap:8px;flex:none}
+.vbtn{border:1.5px solid var(--stage-line);background:transparent;color:var(--stage-ink);border-radius:6px;padding:10px 16px;min-width:52px;min-height:52px;font:600 20px/1.2 var(--font-mono);cursor:pointer}
+.vbtn.close{background:#ffc400;color:#121214;border-color:#ffc400;font:800 18px/1.2 var(--font-body);padding:10px 22px;display:flex;align-items:center;gap:10px}
+.vbtn.close:hover:not(:disabled){border-color:#fff;background:#ffd23d}
+.vbtn.close span{font-size:28px;line-height:1}
 .vbtn:hover:not(:disabled){border-color:var(--stage-ink)}
 .viewer :focus-visible{outline:2px solid #ffc400;outline-offset:2px}
 .v-scroll{flex:1;min-height:0;display:flex;overflow:hidden;background:var(--stage-2)}
@@ -330,11 +336,15 @@ button:disabled{cursor:not-allowed;opacity:.5}
 .v-line{position:absolute;top:0;bottom:0;left:50%;width:2px;margin-left:-1px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.4);pointer-events:none}
 .v-line::after{content:"‹ ›";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:28px;border-radius:14px;background:#fff;color:#121214;display:grid;place-items:center;font:600 15px/1 var(--font-mono);letter-spacing:.1em;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
 .v-bottom{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr) minmax(0,1fr);align-items:center;gap:8px 20px;padding:12px 16px;border-top:1px solid var(--stage-line)}
-.v-label{font:500 12px/1.4 var(--font-mono);min-width:0}
-.v-label b{display:block;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:11px;color:#ffc400}
+.v-label{font:500 15px/1.4 var(--font-mono);min-width:0}
+.v-label b{display:block;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:13px;color:#ffc400}
 .v-label.r{text-align:right}
 .v-bottom input[type=range]{width:100%;accent-color:#ffc400}
 @media (max-width:700px){
+  .v-top{flex-wrap:wrap}
+  .v-btns{width:100%}
+  .vbtn{min-width:46px;padding:8px 12px}
+  .vbtn.close{margin-left:auto}
   .v-bottom{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"rg rg" "la lb"}
   .v-bottom input[type=range]{grid-area:rg}
   .v-label{grid-area:la}.v-label.r{grid-area:lb}
@@ -449,6 +459,7 @@ img{max-width:100%}
   <ul class="sheet" id="list" hidden></ul>
 
   <p class="foot" id="trust" hidden>Se procesa en tu navegador · nada se sube.</p>
+  <footer class="credit"><span>Hecho por <b>Pablo</b></span><span>Compresor de fotos · todo se procesa en tu navegador</span></footer>
 </div>
 
 <div class="veil" id="veil" hidden aria-hidden="true"><i></i><p class="xp">Suelta aquí<br>tus fotos o carpeta</p></div>
@@ -538,7 +549,7 @@ img{max-width:100%}
       <button type="button" class="vbtn" id="vPrev" aria-label="Foto anterior">‹</button>
       <button type="button" class="vbtn" id="vNext" aria-label="Foto siguiente">›</button>
       <button type="button" class="vbtn" id="vZoom" aria-pressed="false">1:1</button>
-      <button type="button" class="vbtn" id="vClose" aria-label="Cerrar comparación">×</button>
+      <button type="button" class="vbtn close" id="vClose" aria-label="Cerrar comparación"><span aria-hidden="true">×</span>Cerrar</button>
     </div>
   </div>
   <div class="v-scroll" id="vScroll">
