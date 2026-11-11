@@ -23,6 +23,10 @@ Abre `index.html` en el navegador. No necesita instalación ni dependencias.
 
 Para publicarlo como página web con GitHub Pages: en el repositorio, **Settings → Pages**, elige la rama `main` y la carpeta `/ (root)`.
 
+## Instalar en el móvil
+
+Con la página publicada (GitHub Pages), ábrela en el móvil y usa **Añadir a pantalla de inicio** (Safari) o **Instalar app** (Chrome). Se instala con el icono amarillo de la foto y se abre a pantalla completa. Los iconos están en `icon.svg`, `icon-192.png`, `icon-512.png` y `apple-touch-icon.png`.
+
 ## Límites
 
 - Los archivos HEIC (iPhone) no se pueden leer en la mayoría de navegadores.
