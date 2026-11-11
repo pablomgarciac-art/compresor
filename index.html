@@ -335,19 +335,28 @@ button:disabled{cursor:not-allowed;opacity:.5}
 .v-wrap img{position:absolute;inset:0;width:100%;height:100%;max-width:none;display:block;pointer-events:none;-webkit-user-drag:none}
 .v-line{position:absolute;top:0;bottom:0;left:50%;width:2px;margin-left:-1px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.4);pointer-events:none}
 .v-line::after{content:"‹ ›";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:28px;border-radius:14px;background:#fff;color:#121214;display:grid;place-items:center;font:600 15px/1 var(--font-mono);letter-spacing:.1em;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
-.v-bottom{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr) minmax(0,1fr);align-items:center;gap:8px 20px;padding:12px 16px;border-top:1px solid var(--stage-line)}
-.v-label{font:500 15px/1.4 var(--font-mono);min-width:0}
-.v-label b{display:block;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:13px;color:#ffc400}
+.v-bottom{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);grid-template-areas:"a s b" "rg rg rg";align-items:center;gap:12px 28px;padding:16px 24px 18px;border-top:1px solid var(--stage-line);background:var(--stage)}
+.v-label{min-width:0;display:flex;flex-direction:column;gap:4px;font:500 16px/1.3 var(--font-mono)}
+.v-label.a{grid-area:a}.v-label.b{grid-area:b;align-items:flex-end}.v-save{grid-area:s}
+.v-label b{font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:15px;color:#ffc400}
+.v-label strong{font:800 clamp(30px,4vw,54px)/1 var(--font-body);font-stretch:112%;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--stage-ink)}
+.v-label.b strong{color:#ffc400}
+.v-label span{color:#b9bcc4}
 .v-label.r{text-align:right}
-.v-bottom input[type=range]{width:100%;accent-color:#ffc400}
+.v-save{display:flex;flex-direction:column;align-items:center;gap:6px;background:#ffc400;color:#121214;border-radius:10px;padding:10px clamp(18px,3vw,40px)}
+.v-save strong{font:800 clamp(30px,4vw,54px)/1 var(--font-body);font-stretch:112%;letter-spacing:-.03em;white-space:nowrap}
+.v-save span{font:700 13px/1 var(--font-mono);letter-spacing:.1em;text-transform:uppercase}
+.v-save.up{background:#f0b866}
+.v-bottom input[type=range]{grid-area:rg;width:100%;height:28px;accent-color:#ffc400}
 @media (max-width:700px){
   .v-top{flex-wrap:wrap}
   .v-btns{width:100%}
   .vbtn{min-width:46px;padding:8px 12px}
   .vbtn.close{margin-left:auto}
-  .v-bottom{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"rg rg" "la lb"}
-  .v-bottom input[type=range]{grid-area:rg}
-  .v-label{grid-area:la}.v-label.r{grid-area:lb}
+  .v-bottom{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"s s" "a b" "rg rg";gap:10px 14px;padding:12px 16px 14px}
+  .v-save{flex-direction:row;justify-content:center;gap:12px}
+  .v-label{font-size:13px}
+  .v-label strong{font-size:28px}
 }
 
 body{margin:0}
@@ -560,9 +569,10 @@ img{max-width:100%}
     </div>
   </div>
   <div class="v-bottom">
-    <div class="v-label"><b>Original</b><span id="vSizeA"></span></div>
+    <div class="v-label a"><b>Original</b><strong id="vWeightA"></strong><span id="vDimA"></span></div>
+    <div class="v-save"><strong id="vSave"></strong><span id="vSaveCap"></span></div>
+    <div class="v-label b r"><b>Comprimida</b><strong id="vWeightB"></strong><span id="vDimB"></span></div>
     <input type="range" id="vRange" min="0" max="100" value="50" aria-label="Posición del divisor entre original y comprimida">
-    <div class="v-label r"><b>Comprimida</b><span id="vSizeB"></span></div>
   </div>
 </div>
 
@@ -1223,8 +1233,14 @@ function openViewer(it) {
   V.b.src = V.urlB;
   $('#vFrame').textContent = pad2(state.items.indexOf(it) + 1);
   $('#vName').textContent = it.path;
-  $('#vSizeA').textContent = fmtBytes(it.origSize) + ' · ' + it.ow + '×' + it.oh + ' px';
-  $('#vSizeB').textContent = (it.kept ? 'sin cambios' : fmtBytes(it.out.size) + ' · ' + it.w + '×' + it.h + ' px');
+  $('#vWeightA').textContent = fmtBytes(it.origSize);
+  $('#vDimA').textContent = it.ow + '×' + it.oh + ' px';
+  $('#vWeightB').textContent = it.kept ? fmtBytes(it.origSize) : fmtBytes(it.out.size);
+  $('#vDimB').textContent = it.kept ? 'sin cambios' : it.w + '×' + it.h + ' px';
+  const pl = pillFor(it.origSize, it.out.size, it.kept);
+  $('#vSave').textContent = it.kept ? '0 %' : pl.text;
+  $('#vSaveCap').textContent = it.kept ? 'sin cambios' : it.out.size <= it.origSize ? 'de ahorro' : 'de aumento';
+  $('.v-save').classList.toggle('up', !it.kept && it.out.size > it.origSize);
   const list = state.items.filter((i) => i.status === 'done');
   const idx = list.indexOf(it);
   $('#vPrev').disabled = idx <= 0;
